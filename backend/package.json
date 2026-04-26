@@ -1,0 +1,18 @@
+{
+  "name": "steambacklog-backend",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Nicholas Dexter",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "node": "^24.15.0",
+    "pg": "^8.20.0"
+  }
+}
