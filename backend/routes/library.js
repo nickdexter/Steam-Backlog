@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../utils/dbconn');
-const errorResponse = require('../utils/error');
+const { sendError } = require('../utils/error');
+const isNumericId = require('../utils/id');
 
 router.get('/', async (req, res) => {
-    const steam64id = Number(req.steam64id);
+    const steam64id = req.steam64id;
 
-    if (!Number.isInteger(steam64id)) {
-        response = errorResponse(400, "Invalid steam64id")
-        return res.json(response);
+    if (!isNumericId(steam64id)) {
+        return sendError(res, 400, "Invalid steam64id");
     }
 
     const result = await db.query(
@@ -17,8 +17,7 @@ router.get('/', async (req, res) => {
     );
 
     if (result.rowCount <= 0) {
-        response = errorResponse(404, "Library not found", "user does not exist");
-        return res.json(response);
+        return sendError(res, 404, "Library not found", "user does not exist");
     }
     return res.json(result.rows);
 });

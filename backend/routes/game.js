@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../utils/dbconn');
-const errorResponse = require('../utils/error');
+const { sendError } = require('../utils/error');
+const isNumericId = require('../utils/id');
 
 router.get('/', async (req, res) => {
     const result = await db.query("SELECT * FROM game");
@@ -9,11 +10,10 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:gameid', async (req, res) => {
-    const gameid  = Number(req.params.gameid);
+    const gameid = req.params.gameid;
 
-    if (!Number.isInteger(gameid) || gameid <= 0){
-        response = errorResponse(400, "Invalid gameid", "gameid must be a positive integer");
-        return res.json(response);
+    if (!isNumericId(gameid)) {
+        return sendError(res, 400, "Invalid gameid", "gameid must be a positive integer");
     }
 
     const result = await db.query(
@@ -21,9 +21,8 @@ router.get('/:gameid', async (req, res) => {
         [req.params.gameid]
     );
 
-    if(result.rowCount <= 0) {
-        response = errorResponse(404, "gameid not found", "");
-        return res.json(response);
+    if (result.rowCount <= 0) {
+        return sendError(res, 404, "gameid not found", "Game not found in our database");
     }
     return res.json(result.rows[0]);
 });

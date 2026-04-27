@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../utils/dbconn');
-const errorResponse = require('../utils/error');
+const { sendError } = require('../utils/error');
+const isNumericId = require('../utils/id');
 
 router.get('/', async (req, res) => {
     const result = await db.query("SELECT * FROM review");
@@ -10,16 +11,20 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     const id = req.params.id;
-    
-    if (!Number.isInteger(id)){
-        response = errorResponse(400, "Invalid id")
-        return res.json(response);
+
+    if (!isNumericId(id)) {
+        return sendError(res, 400, "Invalid id", "id must be a number");
     }
-    
+
     const result = await db.query(
         'SELECT * FROM review WHERE id = $1',
         [req.params.id]
     );
+
+    if (result.rowCount <= 0) {
+        return sendError(res, 404, "Review not found");
+    }
+
     return res.json(result.rows[0]);
 });
 

@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../utils/dbconn');
-const errorResponse = require('../utils/error');
 const libraryRouter = require('./library');
+const { sendError } = require('../utils/error');
+const isNumericId = require('../utils/id');
 
 router.get('/', async (req, res) => {
     const result = await db.query('SELECT * FROM "user"');
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
 // Info for logged in user
 router.get("/me", (req, res) => {
     if (!req.user) {
-        return res.status(401).json({ error: "Not logged in" });
+        return sendError(res, 401, "Not logged in");
     }
 
     res.json({
@@ -22,17 +23,17 @@ router.get("/me", (req, res) => {
     });
 });
 
+// Forward request to library route
 router.use('/:steam64id/library', (req, res, next) => {
     req.steam64id = req.params.steam64id;
     next();
 }, libraryRouter);
 
 router.get('/:steam64id', async (req, res) => {
-    const steam64id = Number(req.params.steam64id);
+    const steam64id = req.params.steam64id;
 
-    if (!Number.isInteger(steam64id)) {
-        response = errorResponse(400, "Invalid steam64id")
-        return res.json(response);
+    if (!isNumericId(steam64id)) {
+        return sendError(res, 400, "Invalid steam64id");
     }
 
     const result = await db.query(
@@ -41,9 +42,9 @@ router.get('/:steam64id', async (req, res) => {
     );
 
     if (result.rowCount <= 0) {
-        response = errorResponse(404, "user not found");
-        return res.json(response);
+        return sendError(res, 404, "user not found");
     }
+
     return res.json(result.rows[0]);
 });
 

@@ -8,4 +8,10 @@ function errorResponse(status, message, details) {
     return { error };
 }
 
-module.exports = errorResponse;
+function sendError(res, status, message, details) {
+    return res.status(status).json({
+        error: { status, message, details }
+    });
+}
+
+module.exports = { errorResponse, sendError };
